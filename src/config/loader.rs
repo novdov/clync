@@ -18,8 +18,8 @@ pub fn config_path() -> PathBuf {
 }
 
 pub fn claude_dir() -> PathBuf {
-    env::current_dir()
-        .unwrap_or_else(|_| PathBuf::from("."))
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
         .join(".claude")
 }
 
