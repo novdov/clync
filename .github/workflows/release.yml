@@ -13,21 +13,11 @@ jobs:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - target: x86_64-apple-darwin
-            os: macos-latest
-            name: claudy-darwin-x64
           - target: aarch64-apple-darwin
             os: macos-latest
             name: claudy-darwin-arm64
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            name: claudy-linux-x64
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            name: claudy-windows-x64.exe
 
     steps:
       - uses: actions/checkout@v6
@@ -40,15 +30,8 @@ jobs:
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Rename binary (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          mv target/${{ matrix.target }}/release/claudy ${{ matrix.name }}
-
-      - name: Rename binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mv target/${{ matrix.target }}/release/claudy.exe ${{ matrix.name }}
+      - name: Rename binary
+        run: mv target/${{ matrix.target }}/release/claudy ${{ matrix.name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
@@ -79,9 +62,7 @@ jobs:
           done
           cd release
           for file in claudy-*; do
-            if [[ ! "$file" == *.exe ]]; then
-              chmod +x "$file"
-            fi
+            chmod +x "$file"
             sha256sum "$file" > "$file.sha256"
           done
 
