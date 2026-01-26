@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="novdov/clync"
+REPO="novdov/claudy"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 API_BASE="https://api.github.com/repos/${REPO}"
 
