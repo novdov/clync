@@ -1,10 +1,19 @@
 use std::fs;
 
 use glob::Pattern;
+use sha1::{Digest, Sha1};
 use walkdir::WalkDir;
 
 use crate::config::loader::claude_dir;
 use crate::Result;
+
+pub fn compute_git_blob_sha(content: &[u8]) -> String {
+    let header = format!("blob {}\0", content.len());
+    let mut hasher = Sha1::new();
+    hasher.update(header.as_bytes());
+    hasher.update(content);
+    format!("{:x}", hasher.finalize())
+}
 
 pub struct WhitelistMatcher {
     patterns: Vec<Pattern>,
@@ -57,6 +66,24 @@ impl WhitelistMatcher {
             .map_err(|e| crate::ClyncError::FileRead(format!("{}: {}", relative_path, e)))?;
 
         Ok(Some(content))
+    }
+
+    pub fn read_local_file_with_sha(&self, relative_path: &str) -> Result<Option<(String, String)>> {
+        let full_path = claude_dir().join(relative_path);
+
+        if !full_path.exists() {
+            return Ok(None);
+        }
+
+        let bytes = fs::read(&full_path)
+            .map_err(|e| crate::ClyncError::FileRead(format!("{}: {}", relative_path, e)))?;
+
+        let sha = compute_git_blob_sha(&bytes);
+
+        let content = String::from_utf8(bytes)
+            .map_err(|e| crate::ClyncError::FileRead(format!("{}: {}", relative_path, e)))?;
+
+        Ok(Some((content, sha)))
     }
 
     pub fn write_local_file(&self, relative_path: &str, content: &str) -> Result<()> {

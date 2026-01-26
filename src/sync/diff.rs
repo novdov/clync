@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use console::style;
 use similar::{ChangeTag, TextDiff};
@@ -61,37 +61,41 @@ impl FileDiff {
 pub fn compute_diff(client: &GitHubClient, matcher: &WhitelistMatcher, sync_mode: &SyncMode) -> Result<Vec<FileDiff>> {
     let local_files: HashSet<String> = matcher.list_local_files()?.into_iter().collect();
 
-    let remote_files: HashSet<String> = client
-        .list_files_recursive("")?
+    let remote_tree = client.get_tree_recursive()?;
+    let remote_files_map: HashMap<String, String> = remote_tree
         .into_iter()
         .filter(|f| sync_mode == &SyncMode::Remote || matcher.matches(&f.path))
-        .map(|f| f.path)
+        .map(|f| (f.path, f.sha))
         .collect();
 
+    let remote_files: HashSet<String> = remote_files_map.keys().cloned().collect();
     let all_files: HashSet<String> = local_files.union(&remote_files).cloned().collect();
 
     let mut diffs = Vec::new();
 
     for path in all_files {
-        let local_content = matcher.read_local_file(&path)?;
-        let remote_result = client.get_file_content(&path)?;
+        let local_result = matcher.read_local_file_with_sha(&path)?;
+        let remote_sha = remote_files_map.get(&path).cloned();
 
-        let (remote_content, remote_sha) = match remote_result {
-            Some((content, sha)) => (Some(content), Some(sha)),
-            None => (None, None),
+        let (status, local_content) = match &local_result {
+            Some((content, sha)) => (
+                match &remote_sha {
+                    Some(r_sha) if r_sha == sha => FileStatus::Same,
+                    Some(_) => FileStatus::Modified,
+                    None => FileStatus::LocalOnly,
+                },
+                Some(content.clone()),
+            ),
+            None => match &remote_sha {
+                Some(_) => (FileStatus::RemoteOnly, None),
+                None => continue,
+            },
         };
 
-        let status = match (&local_content, &remote_content) {
-            (None, None) => continue,
-            (Some(_), None) => FileStatus::LocalOnly,
-            (None, Some(_)) => FileStatus::RemoteOnly,
-            (Some(local), Some(remote)) => {
-                if local == remote {
-                    FileStatus::Same
-                } else {
-                    FileStatus::Modified
-                }
-            }
+        let remote_content = if status == FileStatus::Modified || status == FileStatus::RemoteOnly {
+            client.get_file_content(&path)?.map(|(content, _)| content)
+        } else {
+            None
         };
 
         diffs.push(FileDiff {
