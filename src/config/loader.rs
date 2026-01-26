@@ -1,4 +1,3 @@
-use std::env;
 use std::fs;
 use std::path::PathBuf;
 
@@ -8,8 +7,8 @@ use crate::Result;
 use super::Config;
 
 pub fn config_dir() -> PathBuf {
-    env::current_dir()
-        .unwrap_or_else(|_| PathBuf::from("."))
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
         .join(".clync")
 }
 
