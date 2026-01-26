@@ -20,6 +20,7 @@ chrono = "0.4"
 glob = "0.3"
 dirs = "5"
 base64 = "0.22"
+sha1 = "0.10"
 self_update = { version = "0.41", features = ["archive-tar", "archive-zip", "compression-flate2"] }
 
 [dev-dependencies]

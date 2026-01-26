@@ -57,6 +57,45 @@ pub struct RepoContent {
     pub content: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct TreeItem {
+    pub path: String,
+    #[serde(rename = "type")]
+    pub item_type: String,
+    pub sha: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TreeResponse {
+    pub sha: String,
+    pub tree: Vec<TreeItem>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RepoInfo {
+    default_branch: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct BranchInfo {
+    commit: CommitRef,
+}
+
+#[derive(Debug, Deserialize)]
+struct CommitRef {
+    sha: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct CommitInfo {
+    tree: TreeRef,
+}
+
+#[derive(Debug, Deserialize)]
+struct TreeRef {
+    sha: String,
+}
+
 impl GitHubClient {
     pub fn new(repo: &str) -> Self {
         Self {
@@ -175,5 +214,50 @@ impl GitHubClient {
         }
 
         Ok(())
+    }
+
+    pub fn get_tree_recursive(&self) -> Result<Vec<TreeItem>> {
+        let repo_path = format!("repos/{}", self.repo);
+        let output = run_gh(&["api", &repo_path])?;
+        if let Some(err) = check_gh_error(&output) {
+            return Err(err);
+        }
+        let repo_info: RepoInfo = serde_json::from_slice(&output.stdout)
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse repo info: {}", e)))?;
+
+        let branch_path = format!("repos/{}/branches/{}", self.repo, repo_info.default_branch);
+        let output = run_gh(&["api", &branch_path])?;
+        if let Some(err) = check_gh_error(&output) {
+            return Err(err);
+        }
+        let branch_info: BranchInfo = serde_json::from_slice(&output.stdout)
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse branch info: {}", e)))?;
+
+        let commit_path = format!("repos/{}/git/commits/{}", self.repo, branch_info.commit.sha);
+        let output = run_gh(&["api", &commit_path])?;
+        if let Some(err) = check_gh_error(&output) {
+            return Err(err);
+        }
+        let commit_info: CommitInfo = serde_json::from_slice(&output.stdout)
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse commit info: {}", e)))?;
+
+        let tree_path = format!(
+            "repos/{}/git/trees/{}?recursive=1",
+            self.repo, commit_info.tree.sha
+        );
+        let output = run_gh(&["api", &tree_path])?;
+        if let Some(err) = check_gh_error(&output) {
+            return Err(err);
+        }
+        let tree_response: TreeResponse = serde_json::from_slice(&output.stdout)
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse tree response: {}", e)))?;
+
+        let files: Vec<TreeItem> = tree_response
+            .tree
+            .into_iter()
+            .filter(|item| item.item_type == "blob")
+            .collect();
+
+        Ok(files)
     }
 }
