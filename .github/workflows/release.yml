@@ -17,7 +17,7 @@ jobs:
         include:
           - target: aarch64-apple-darwin
             os: macos-latest
-            name: claudy-darwin-arm64
+            name: clync-darwin-arm64
 
     steps:
       - uses: actions/checkout@v6
@@ -31,7 +31,7 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Rename binary
-        run: mv target/${{ matrix.target }}/release/claudy ${{ matrix.name }}
+        run: mv target/${{ matrix.target }}/release/clync ${{ matrix.name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
@@ -61,7 +61,7 @@ jobs:
             cp "$dir"* release/
           done
           cd release
-          for file in claudy-*; do
+          for file in clync-*; do
             chmod +x "$file"
             sha256sum "$file" > "$file.sha256"
           done

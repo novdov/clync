@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="novdov/claudy"
+REPO="novdov/clync"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 API_BASE="https://api.github.com/repos/${REPO}"
 
@@ -50,14 +50,14 @@ if [ "$OS" = "unsupported" ] || [ "$ARCH" = "unsupported" ]; then
 fi
 
 if [ "$OS" = "windows" ]; then
-    BINARY_NAME="claudy-windows-x64.exe"
-    TARGET_NAME="claudy.exe"
+    BINARY_NAME="clync-windows-x64.exe"
+    TARGET_NAME="clync.exe"
 else
-    BINARY_NAME="claudy-${OS}-${ARCH}"
-    TARGET_NAME="claudy"
+    BINARY_NAME="clync-${OS}-${ARCH}"
+    TARGET_NAME="clync"
 fi
 
-echo "Installing claudy..."
+echo "Installing clync..."
 echo "Platform: ${OS}-${ARCH}"
 
 echo "Fetching latest release..."
@@ -89,7 +89,7 @@ else
 fi
 
 echo ""
-echo "✓ claudy ${VERSION} installed to ${INSTALL_DIR}/${TARGET_NAME}"
+echo "✓ clync ${VERSION} installed to ${INSTALL_DIR}/${TARGET_NAME}"
 echo ""
 echo "Usage:"
-echo "  claudy --help"
+echo "  clync --help"

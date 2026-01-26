@@ -1,10 +1,10 @@
 [package]
-name = "claudy"
+name = "clync"
 version = "0.1.0"
 edition = "2021"
 description = "Claude Code 설정 동기화 도구"
 license = "MIT"
-repository = "https://github.com/novdov/claudy"
+repository = "https://github.com/novdov/clync"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }

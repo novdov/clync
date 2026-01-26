@@ -3,7 +3,7 @@
 ## Tap 저장소 생성
 
 1. GitHub에 `homebrew-tap` 저장소 생성
-2. `claudy.rb` 파일을 해당 저장소의 루트에 복사
+2. `clync.rb` 파일을 해당 저장소의 루트에 복사
 3. SHA256 해시값을 실제 릴리즈 바이너리의 해시로 교체
 
 ## SHA256 해시 생성
@@ -11,22 +11,22 @@
 릴리즈 후 다음 명령으로 해시 생성:
 
 ```bash
-curl -sL https://github.com/novdov/claudy/releases/download/v0.1.0/claudy-darwin-arm64 | shasum -a 256
-curl -sL https://github.com/novdov/claudy/releases/download/v0.1.0/claudy-darwin-x64 | shasum -a 256
-curl -sL https://github.com/novdov/claudy/releases/download/v0.1.0/claudy-linux-x64 | shasum -a 256
+curl -sL https://github.com/novdov/clync/releases/download/v0.1.0/clync-darwin-arm64 | shasum -a 256
+curl -sL https://github.com/novdov/clync/releases/download/v0.1.0/clync-darwin-x64 | shasum -a 256
+curl -sL https://github.com/novdov/clync/releases/download/v0.1.0/clync-linux-x64 | shasum -a 256
 ```
 
 ## 사용자 설치 방법
 
 ```bash
 brew tap novdov/tap
-brew install claudy
+brew install clync
 ```
 
 ## 업데이트 방법
 
 ```bash
-brew upgrade claudy
+brew upgrade clync
 ```
 
 ## 자동화

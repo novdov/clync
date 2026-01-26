@@ -38,11 +38,11 @@
 ### CLI 명령어 구조
 
 ```
-claudy push              # 로컬 → 원격
-claudy pull              # 원격 → 로컬
-claudy diff              # 로컬/원격 비교
-claudy status            # 동기화 상태 확인
-claudy config            # 설정 관리 (repo URL, 화이트리스트 등)
+clync push              # 로컬 → 원격
+clync pull              # 원격 → 로컬
+clync diff              # 로컬/원격 비교
+clync status            # 동기화 상태 확인
+clync config            # 설정 관리 (repo URL, 화이트리스트 등)
 ```
 
 ### 옵션

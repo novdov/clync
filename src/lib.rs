@@ -7,4 +7,4 @@ pub mod sync;
 pub mod update;
 pub mod whitelist;
 
-pub use error::{ClaudyError, Result};
+pub use error::{ClyncError, Result};

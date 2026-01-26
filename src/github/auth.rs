@@ -1,7 +1,7 @@
 use std::io::ErrorKind;
 use std::process::Command;
 
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 
 pub fn check_auth() -> crate::Result<()> {
     let output = Command::new("gh")
@@ -9,14 +9,14 @@ pub fn check_auth() -> crate::Result<()> {
         .output()
         .map_err(|e| {
             if e.kind() == ErrorKind::NotFound {
-                ClaudyError::GhNotInstalled
+                ClyncError::GhNotInstalled
             } else {
-                ClaudyError::GitHubApi(format!("Failed to run gh: {}", e))
+                ClyncError::GitHubApi(format!("Failed to run gh: {}", e))
             }
         })?;
 
     if !output.status.success() {
-        return Err(ClaudyError::NotAuthenticated);
+        return Err(ClyncError::NotAuthenticated);
     }
 
     Ok(())
