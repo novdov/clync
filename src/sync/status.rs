@@ -1,7 +1,7 @@
 use console::style;
 
 use crate::config::{load_config, SyncMode};
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 use crate::github::GitHubClient;
 use crate::whitelist::WhitelistMatcher;
 use crate::Result;
@@ -10,7 +10,7 @@ use super::diff::{compute_diff, FileStatus};
 
 pub fn get_status() -> Result<StatusSummary> {
     let config = load_config()?;
-    let repo = config.repo.as_ref().ok_or(ClaudyError::RepoNotConfigured)?;
+    let repo = config.repo.as_ref().ok_or(ClyncError::RepoNotConfigured)?;
 
     let client = GitHubClient::new(repo);
     let matcher = WhitelistMatcher::new(&config.whitelist.paths);
@@ -52,7 +52,7 @@ impl StatusSummary {
 pub fn show_status() -> Result<()> {
     let config = load_config()?;
 
-    println!("{}", style("Claudy Status").bold());
+    println!("{}", style("Clync Status").bold());
     println!();
 
     if let Some(repo) = &config.repo {
@@ -62,7 +62,7 @@ pub fn show_status() -> Result<()> {
         println!();
         println!(
             "{}",
-            style("Set repository with 'claudy config repo <owner/repo>'").dim()
+            style("Set repository with 'clync config repo <owner/repo>'").dim()
         );
         return Ok(());
     }
@@ -73,7 +73,7 @@ pub fn show_status() -> Result<()> {
     if config.whitelist.paths.is_empty() && config.sync_mode == SyncMode::Whitelist {
         println!(
             "{}",
-            style("Whitelist is empty. Add with 'claudy config whitelist add <path>'").yellow()
+            style("Whitelist is empty. Add with 'clync config whitelist add <path>'").yellow()
         );
         return Ok(());
     }

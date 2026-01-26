@@ -24,6 +24,6 @@ target
 
 docs/plans/
 
-# Claudy local config and test data
-.claudy/
+# Clync local config and test data
+.clync/
 .claude/

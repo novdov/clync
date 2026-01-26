@@ -2,7 +2,7 @@ use console::style;
 use dialoguer::Confirm;
 
 use crate::config::{load_config, SyncMode};
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 use crate::github::GitHubClient;
 use crate::whitelist::WhitelistMatcher;
 use crate::Result;
@@ -11,10 +11,10 @@ use super::diff::{compute_diff, FileDiff, FileStatus};
 
 pub fn execute(dry_run: bool, force: bool) -> Result<()> {
     let config = load_config()?;
-    let repo = config.repo.as_ref().ok_or(ClaudyError::RepoNotConfigured)?;
+    let repo = config.repo.as_ref().ok_or(ClyncError::RepoNotConfigured)?;
 
     if config.whitelist.paths.is_empty() && config.sync_mode == SyncMode::Whitelist {
-        return Err(ClaudyError::EmptyWhitelist);
+        return Err(ClyncError::EmptyWhitelist);
     }
 
     let client = GitHubClient::new(repo);
@@ -67,14 +67,14 @@ pub fn execute(dry_run: bool, force: bool) -> Result<()> {
                 .unwrap_or(false);
 
             if !confirmed {
-                return Err(ClaudyError::UserCancelled);
+                return Err(ClyncError::UserCancelled);
             }
         }
     }
 
     for diff in &to_push {
         let content = diff.local_content.as_ref().ok_or_else(|| {
-            ClaudyError::FileRead(format!("Cannot read local file: {}", diff.path))
+            ClyncError::FileRead(format!("Cannot read local file: {}", diff.path))
         })?;
 
         let message = match diff.status {

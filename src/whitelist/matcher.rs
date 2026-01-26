@@ -54,7 +54,7 @@ impl WhitelistMatcher {
         }
 
         let content = fs::read_to_string(&full_path)
-            .map_err(|e| crate::ClaudyError::FileRead(format!("{}: {}", relative_path, e)))?;
+            .map_err(|e| crate::ClyncError::FileRead(format!("{}: {}", relative_path, e)))?;
 
         Ok(Some(content))
     }
@@ -67,7 +67,7 @@ impl WhitelistMatcher {
         }
 
         fs::write(&full_path, content)
-            .map_err(|e| crate::ClaudyError::FileWrite(format!("{}: {}", relative_path, e)))?;
+            .map_err(|e| crate::ClyncError::FileWrite(format!("{}: {}", relative_path, e)))?;
 
         Ok(())
     }

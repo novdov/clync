@@ -3,7 +3,7 @@ use dialoguer::Select;
 
 use crate::backup::BackupManager;
 use crate::config::{load_config, SyncMode};
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 use crate::github::GitHubClient;
 use crate::whitelist::WhitelistMatcher;
 use crate::Result;
@@ -12,10 +12,10 @@ use super::diff::{compute_diff, FileDiff, FileStatus};
 
 pub fn execute(dry_run: bool, force: bool) -> Result<()> {
     let config = load_config()?;
-    let repo = config.repo.as_ref().ok_or(ClaudyError::RepoNotConfigured)?;
+    let repo = config.repo.as_ref().ok_or(ClyncError::RepoNotConfigured)?;
 
     if config.whitelist.paths.is_empty() && config.sync_mode == SyncMode::Whitelist {
-        return Err(ClaudyError::EmptyWhitelist);
+        return Err(ClyncError::EmptyWhitelist);
     }
 
     let client = GitHubClient::new(repo);
@@ -97,7 +97,7 @@ pub fn execute(dry_run: bool, force: bool) -> Result<()> {
         }
 
         let content = diff.remote_content.as_ref().ok_or_else(|| {
-            ClaudyError::FileRead(format!("Cannot read remote file: {}", diff.path))
+            ClyncError::FileRead(format!("Cannot read remote file: {}", diff.path))
         })?;
 
         print!("  {} {} ... ", style("←").cyan(), diff.path);

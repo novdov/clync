@@ -17,7 +17,7 @@ impl BackupManager {
     pub fn new() -> Self {
         let backup_dir = env::current_dir()
             .unwrap_or_else(|_| PathBuf::from("."))
-            .join(".claudy")
+            .join(".clync")
             .join("backup");
 
         Self { backup_dir }

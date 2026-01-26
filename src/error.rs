@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum ClaudyError {
+pub enum ClyncError {
     #[error("GitHub CLI (gh) is not installed. Install from https://cli.github.com")]
     GhNotInstalled,
 
@@ -17,7 +17,7 @@ pub enum ClaudyError {
     #[error("Config parse error: {0}")]
     ConfigParse(String),
 
-    #[error("Repository not configured. Set with 'claudy config repo <owner/repo>'")]
+    #[error("Repository not configured. Set with 'clync config repo <owner/repo>'")]
     RepoNotConfigured,
 
     #[error("File not found: {0}")]
@@ -45,4 +45,4 @@ pub enum ClaudyError {
     Io(#[from] std::io::Error),
 }
 
-pub type Result<T> = std::result::Result<T, ClaudyError>;
+pub type Result<T> = std::result::Result<T, ClyncError>;

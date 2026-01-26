@@ -1,10 +1,10 @@
 use clap::Parser;
-use claudy::cli::{Cli, Commands, ConfigCommands, WhitelistCommands};
-use claudy::config;
-use claudy::github;
-use claudy::sync;
-use claudy::update;
-use claudy::Result;
+use clync::cli::{Cli, Commands, ConfigCommands, WhitelistCommands};
+use clync::config;
+use clync::github;
+use clync::sync;
+use clync::update;
+use clync::Result;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();

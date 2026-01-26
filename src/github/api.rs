@@ -4,14 +4,14 @@ use std::process::{Command, Output};
 use base64::Engine;
 use serde::Deserialize;
 
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 use crate::Result;
 
-fn map_gh_error(e: std::io::Error) -> ClaudyError {
+fn map_gh_error(e: std::io::Error) -> ClyncError {
     if e.kind() == ErrorKind::NotFound {
-        ClaudyError::GhNotInstalled
+        ClyncError::GhNotInstalled
     } else {
-        ClaudyError::GitHubApi(format!("Failed to run gh: {}", e))
+        ClyncError::GitHubApi(format!("Failed to run gh: {}", e))
     }
 }
 
@@ -30,12 +30,12 @@ fn run_gh_with_extra_args(args: &[&str], extra: &[String]) -> Result<Output> {
         .map_err(map_gh_error)
 }
 
-fn check_gh_error(output: &Output) -> Option<ClaudyError> {
+fn check_gh_error(output: &Output) -> Option<ClyncError> {
     if output.status.success() {
         return None;
     }
     let stderr = String::from_utf8_lossy(&output.stderr);
-    Some(ClaudyError::GitHubApi(stderr.to_string()))
+    Some(ClyncError::GitHubApi(stderr.to_string()))
 }
 
 fn is_not_found(output: &Output) -> bool {
@@ -87,7 +87,7 @@ impl GitHubClient {
                 let single: RepoContent = serde_json::from_str(&stdout)?;
                 Ok::<_, serde_json::Error>(vec![single])
             })
-            .map_err(|e| ClaudyError::GitHubApi(format!("Failed to parse response: {}", e)))?;
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse response: {}", e)))?;
 
         Ok(contents)
     }
@@ -122,7 +122,7 @@ impl GitHubClient {
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let content: RepoContent = serde_json::from_str(&stdout)
-            .map_err(|e| ClaudyError::GitHubApi(format!("Failed to parse response: {}", e)))?;
+            .map_err(|e| ClyncError::GitHubApi(format!("Failed to parse response: {}", e)))?;
 
         let Some(encoded) = content.content else {
             return Ok(None);
@@ -131,10 +131,10 @@ impl GitHubClient {
         let encoded_clean = encoded.replace('\n', "");
         let decoded = base64::engine::general_purpose::STANDARD
             .decode(&encoded_clean)
-            .map_err(|e| ClaudyError::GitHubApi(format!("Base64 decode failed: {}", e)))?;
+            .map_err(|e| ClyncError::GitHubApi(format!("Base64 decode failed: {}", e)))?;
 
         let text = String::from_utf8(decoded)
-            .map_err(|e| ClaudyError::GitHubApi(format!("UTF-8 decode failed: {}", e)))?;
+            .map_err(|e| ClyncError::GitHubApi(format!("UTF-8 decode failed: {}", e)))?;
 
         let sha = content.sha.unwrap_or_default();
 

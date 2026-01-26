@@ -4,7 +4,7 @@ use console::style;
 use similar::{ChangeTag, TextDiff};
 
 use crate::config::{load_config, SyncMode};
-use crate::error::ClaudyError;
+use crate::error::ClyncError;
 use crate::github::GitHubClient;
 use crate::whitelist::WhitelistMatcher;
 use crate::Result;
@@ -110,10 +110,10 @@ pub fn compute_diff(client: &GitHubClient, matcher: &WhitelistMatcher, sync_mode
 
 pub fn show_diff() -> Result<()> {
     let config = load_config()?;
-    let repo = config.repo.as_ref().ok_or(ClaudyError::RepoNotConfigured)?;
+    let repo = config.repo.as_ref().ok_or(ClyncError::RepoNotConfigured)?;
 
     if config.whitelist.paths.is_empty() && config.sync_mode == SyncMode::Whitelist {
-        return Err(ClaudyError::EmptyWhitelist);
+        return Err(ClyncError::EmptyWhitelist);
     }
 
     let client = GitHubClient::new(repo);
