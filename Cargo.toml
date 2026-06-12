@@ -1,6 +1,6 @@
 [package]
 name = "clync"
-version = "0.1.0"
+version = "0.7.0"
 edition = "2021"
 description = "Claude Code 설정 동기화 도구"
 license = "MIT"
