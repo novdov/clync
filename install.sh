@@ -3,7 +3,6 @@ set -e
 
 REPO="novdov/claudy"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
-OLD_INSTALL_DIR="/usr/local/bin"
 API_BASE="https://api.github.com/repos/${REPO}"
 
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -81,11 +80,6 @@ echo "Downloading... (${VERSION})"
 curl -fsSL -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$ASSET_URL" -o "${TMP_DIR}/${TARGET_NAME}"
 
 chmod +x "${TMP_DIR}/${TARGET_NAME}"
-
-if [ -f "${OLD_INSTALL_DIR}/${TARGET_NAME}" ]; then
-    echo "Removing old binary from ${OLD_INSTALL_DIR}..."
-    sudo rm -f "${OLD_INSTALL_DIR}/${TARGET_NAME}"
-fi
 
 mkdir -p "$INSTALL_DIR"
 mv "${TMP_DIR}/${TARGET_NAME}" "${INSTALL_DIR}/${TARGET_NAME}"
