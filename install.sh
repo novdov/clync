@@ -2,7 +2,8 @@
 set -e
 
 REPO="novdov/claudy"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+OLD_INSTALL_DIR="/usr/local/bin"
 API_BASE="https://api.github.com/repos/${REPO}"
 
 if [ -z "$GITHUB_TOKEN" ]; then
@@ -81,15 +82,23 @@ curl -fsSL -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$ASSET_URL" 
 
 chmod +x "${TMP_DIR}/${TARGET_NAME}"
 
-if [ -w "$INSTALL_DIR" ]; then
-    mv "${TMP_DIR}/${TARGET_NAME}" "${INSTALL_DIR}/${TARGET_NAME}"
-else
-    echo "Installing to ${INSTALL_DIR} with sudo..."
-    sudo mv "${TMP_DIR}/${TARGET_NAME}" "${INSTALL_DIR}/${TARGET_NAME}"
+if [ -f "${OLD_INSTALL_DIR}/${TARGET_NAME}" ]; then
+    echo "Removing old binary from ${OLD_INSTALL_DIR}..."
+    sudo rm -f "${OLD_INSTALL_DIR}/${TARGET_NAME}"
 fi
 
+mkdir -p "$INSTALL_DIR"
+mv "${TMP_DIR}/${TARGET_NAME}" "${INSTALL_DIR}/${TARGET_NAME}"
+
 echo ""
-echo "✓ clync ${VERSION} installed to ${INSTALL_DIR}/${TARGET_NAME}"
+echo "clync ${VERSION} installed to ${INSTALL_DIR}/${TARGET_NAME}"
+
+if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
+    echo ""
+    echo "Add the following to your shell profile (.zshrc, .bashrc, etc.):"
+    echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+fi
+
 echo ""
 echo "Usage:"
 echo "  clync --help"
