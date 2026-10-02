@@ -13,7 +13,7 @@ pub fn get_status() -> Result<StatusSummary> {
     let repo = config.repo.as_ref().ok_or(ClyncError::RepoNotConfigured)?;
 
     let client = GitHubClient::new(repo);
-    let matcher = WhitelistMatcher::new(&config.whitelist.paths);
+    let matcher = WhitelistMatcher::new(&config.whitelist.paths, &config.whitelist.exclude);
 
     let diffs = compute_diff(&client, &matcher, &config.sync_mode)?;
 

@@ -21,6 +21,8 @@ pub enum SyncMode {
 pub struct Whitelist {
     #[serde(default)]
     pub paths: Vec<String>,
+    #[serde(default)]
+    pub exclude: Vec<String>,
 }
 
 impl Config {

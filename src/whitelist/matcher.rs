@@ -17,20 +17,33 @@ pub fn compute_git_blob_sha(content: &[u8]) -> String {
 
 pub struct WhitelistMatcher {
     patterns: Vec<Pattern>,
+    exclude: Vec<String>,
 }
 
 impl WhitelistMatcher {
-    pub fn new(paths: &[String]) -> Self {
+    pub fn new(paths: &[String], exclude: &[String]) -> Self {
         let patterns = paths
             .iter()
             .filter_map(|p| Pattern::new(p).ok())
             .collect();
 
-        Self { patterns }
+        Self {
+            patterns,
+            exclude: exclude.to_vec(),
+        }
     }
 
     pub fn matches(&self, path: &str) -> bool {
-        self.patterns.iter().any(|p| p.matches(path))
+        self.patterns.iter().any(|p| p.matches(path)) && !self.is_excluded(path)
+    }
+
+    /// 제외 항목은 glob 패턴으로 매칭하거나 디렉토리 경로로 간주하여 하위 전체를 제외
+    pub fn is_excluded(&self, path: &str) -> bool {
+        self.exclude.iter().any(|e| {
+            let dir = e.trim_end_matches('/');
+            Pattern::new(e).is_ok_and(|p| p.matches(path))
+                || path.strip_prefix(dir).is_some_and(|rest| rest.starts_with('/'))
+        })
     }
 
     pub fn list_local_files(&self) -> Result<Vec<String>> {
@@ -116,14 +129,14 @@ mod tests {
 
     #[test]
     fn test_exact_match() {
-        let matcher = WhitelistMatcher::new(&["settings.json".to_string()]);
+        let matcher = WhitelistMatcher::new(&["settings.json".to_string()], &[]);
         assert!(matcher.matches("settings.json"));
         assert!(!matcher.matches("other.json"));
     }
 
     #[test]
     fn test_glob_pattern() {
-        let matcher = WhitelistMatcher::new(&["commands/**/*.md".to_string()]);
+        let matcher = WhitelistMatcher::new(&["commands/**/*.md".to_string()], &[]);
         assert!(matcher.matches("commands/git/commit.md"));
         assert!(matcher.matches("commands/test.md"));
         assert!(!matcher.matches("settings.json"));
@@ -131,14 +144,48 @@ mod tests {
 
     #[test]
     fn test_multiple_patterns() {
-        let matcher = WhitelistMatcher::new(&[
-            "settings.json".to_string(),
-            "CLAUDE.md".to_string(),
-            "skills/**/*.md".to_string(),
-        ]);
+        let matcher = WhitelistMatcher::new(
+            &[
+                "settings.json".to_string(),
+                "CLAUDE.md".to_string(),
+                "skills/**/*.md".to_string(),
+            ],
+            &[],
+        );
         assert!(matcher.matches("settings.json"));
         assert!(matcher.matches("CLAUDE.md"));
         assert!(matcher.matches("skills/coding/rust.md"));
         assert!(!matcher.matches("random.txt"));
+    }
+
+    #[test]
+    fn test_exclude_glob_pattern_under_whitelisted_dir() {
+        let matcher = WhitelistMatcher::new(
+            &["skills/**".to_string()],
+            &["skills/private/**".to_string()],
+        );
+        assert!(matcher.matches("skills/coding/rust.md"));
+        assert!(!matcher.matches("skills/private/secret.md"));
+    }
+
+    #[test]
+    fn test_exclude_directory_path_excludes_descendants() {
+        let matcher = WhitelistMatcher::new(
+            &["skills/**".to_string()],
+            &["skills/private".to_string()],
+        );
+        assert!(!matcher.matches("skills/private/secret.md"));
+        assert!(!matcher.matches("skills/private/nested/secret.md"));
+        assert!(matcher.matches("skills/private-notes.md"));
+    }
+
+    #[test]
+    fn test_exclude_single_file() {
+        let matcher = WhitelistMatcher::new(
+            &["commands/**/*.md".to_string()],
+            &["commands/git/commit.md".to_string()],
+        );
+        assert!(!matcher.matches("commands/git/commit.md"));
+        assert!(matcher.matches("commands/git/push.md"));
     }
 }

@@ -19,7 +19,7 @@ pub fn execute(dry_run: bool, force: bool) -> Result<()> {
     }
 
     let client = GitHubClient::new(repo);
-    let matcher = WhitelistMatcher::new(&config.whitelist.paths);
+    let matcher = WhitelistMatcher::new(&config.whitelist.paths, &config.whitelist.exclude);
 
     let diffs = compute_diff(&client, &matcher, &config.sync_mode)?;
 
