@@ -64,7 +64,10 @@ pub fn compute_diff(client: &GitHubClient, matcher: &WhitelistMatcher, sync_mode
     let remote_tree = client.get_tree_recursive()?;
     let remote_files_map: HashMap<String, String> = remote_tree
         .into_iter()
-        .filter(|f| sync_mode == &SyncMode::Remote || matcher.matches(&f.path))
+        .filter(|f| match sync_mode {
+            SyncMode::Remote => !matcher.is_excluded(&f.path),
+            SyncMode::Whitelist => matcher.matches(&f.path),
+        })
         .map(|f| (f.path, f.sha))
         .collect();
 
@@ -121,7 +124,7 @@ pub fn show_diff() -> Result<()> {
     }
 
     let client = GitHubClient::new(repo);
-    let matcher = WhitelistMatcher::new(&config.whitelist.paths);
+    let matcher = WhitelistMatcher::new(&config.whitelist.paths, &config.whitelist.exclude);
 
     let diffs = compute_diff(&client, &matcher, &config.sync_mode)?;
 
