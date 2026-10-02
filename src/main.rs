@@ -1,5 +1,5 @@
 use clap::Parser;
-use clync::cli::{Cli, Commands, ConfigCommands, WhitelistCommands};
+use clync::cli::{Cli, Commands, ConfigCommands, ExcludeCommands, WhitelistCommands};
 use clync::config;
 use clync::github;
 use clync::sync;
@@ -43,6 +43,17 @@ fn main() -> Result<()> {
                 WhitelistCommands::Remove { path } => {
                     config::whitelist_remove(&path)?;
                 }
+                WhitelistCommands::Exclude { command } => match command {
+                    ExcludeCommands::List => {
+                        config::exclude_list()?;
+                    }
+                    ExcludeCommands::Add { path } => {
+                        config::exclude_add(&path)?;
+                    }
+                    ExcludeCommands::Remove { path } => {
+                        config::exclude_remove(&path)?;
+                    }
+                },
             },
         },
         Commands::SelfUpdate => {

@@ -31,6 +31,14 @@ pub fn show() -> Result<()> {
         }
     }
 
+    if !config.whitelist.exclude.is_empty() {
+        println!();
+        println!("{}", style("Exclude").bold());
+        for path in &config.whitelist.exclude {
+            println!("  - {}", path);
+        }
+    }
+
     Ok(())
 }
 
@@ -94,6 +102,50 @@ pub fn whitelist_remove(path: &str) -> Result<()> {
         println!("Removed {} from whitelist", style(path).green());
     } else {
         println!("{} is not in the whitelist", style(path).yellow());
+    }
+
+    Ok(())
+}
+
+pub fn exclude_list() -> Result<()> {
+    let config = load_config()?;
+
+    println!("{}", style("Exclude").bold());
+    if config.whitelist.exclude.is_empty() {
+        println!("  {}", style("(empty)").dim());
+    } else {
+        for path in &config.whitelist.exclude {
+            println!("  - {}", path);
+        }
+    }
+
+    Ok(())
+}
+
+pub fn exclude_add(path: &str) -> Result<()> {
+    let mut config = load_config()?;
+
+    if config.whitelist.exclude.contains(&path.to_string()) {
+        println!("{} is already excluded", style(path).yellow());
+        return Ok(());
+    }
+
+    config.whitelist.exclude.push(path.to_string());
+    save_config(&config)?;
+    println!("Added {} to exclude", style(path).green());
+
+    Ok(())
+}
+
+pub fn exclude_remove(path: &str) -> Result<()> {
+    let mut config = load_config()?;
+
+    if let Some(pos) = config.whitelist.exclude.iter().position(|p| p == path) {
+        config.whitelist.exclude.remove(pos);
+        save_config(&config)?;
+        println!("Removed {} from exclude", style(path).green());
+    } else {
+        println!("{} is not excluded", style(path).yellow());
     }
 
     Ok(())

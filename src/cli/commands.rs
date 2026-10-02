@@ -83,4 +83,28 @@ pub enum WhitelistCommands {
         /// Path to remove
         path: String,
     },
+
+    /// Manage paths excluded from whitelisted paths
+    Exclude {
+        #[command(subcommand)]
+        command: ExcludeCommands,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum ExcludeCommands {
+    /// Show excluded paths
+    List,
+
+    /// Add path to exclude
+    Add {
+        /// Path to exclude (supports glob patterns, a directory path excludes all its descendants)
+        path: String,
+    },
+
+    /// Remove path from exclude
+    Remove {
+        /// Path to remove
+        path: String,
+    },
 }

@@ -1,3 +1,3 @@
 pub mod commands;
 
-pub use commands::{Cli, Commands, ConfigCommands, WhitelistCommands};
+pub use commands::{Cli, Commands, ConfigCommands, ExcludeCommands, WhitelistCommands};
