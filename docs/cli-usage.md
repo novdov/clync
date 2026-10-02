@@ -104,6 +104,26 @@ clync config whitelist remove <path>
 - `commands/**/*.md` - commands 하위 모든 .md 파일
 - `skills/*.md` - skills 디렉토리의 .md 파일
 
+#### clync config whitelist exclude
+
+화이트리스트에 포함되더라도 동기화에서 제외할 경로를 관리합니다. 제외된 파일은 push, pull, diff, status 모두에서 다루지 않습니다.
+
+```bash
+# 목록 표시
+clync config whitelist exclude list
+
+# 경로 추가 (glob 패턴 지원)
+clync config whitelist exclude add <path>
+
+# 경로 제거
+clync config whitelist exclude remove <path>
+```
+
+**제외 패턴 예시:**
+- `skills/private` - skills/private 하위 전체 (glob 없이 디렉토리 경로만 적어도 하위 전체 제외)
+- `skills/private/**` - 위와 동일
+- `commands/git/commit.md` - 특정 파일
+
 ## 설정 파일
 
 `.clync/config.toml`에 저장됩니다.
@@ -117,6 +137,9 @@ paths = [
     "settings.json",
     "CLAUDE.md",
     "commands/**/*.md"
+]
+exclude = [
+    "commands/private"
 ]
 ```
 

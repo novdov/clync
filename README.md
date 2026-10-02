@@ -35,6 +35,20 @@ clync config whitelist add <path>        # add entry
 clync config whitelist remove <path>     # remove entry
 ```
 
+## Exclude format
+
+Paths excluded from sync even if they match the whitelist. Supports glob patterns, and a plain directory path excludes everything under it.
+
+- `skills/private` - everything under `skills/private`
+- `skills/private/**` - same as above, using glob
+- `commands/git/commit.md` - single file
+
+```sh
+clync config whitelist exclude list            # list entries
+clync config whitelist exclude add <path>      # add entry
+clync config whitelist exclude remove <path>   # remove entry
+```
+
 ## Usage
 
 ```sh
