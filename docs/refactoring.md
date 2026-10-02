@@ -373,6 +373,53 @@
 - `Sync mode: {:?}` 출력을 사용자용 문자열로 변경
 - push의 원격 삭제와 pull의 로컬 미삭제 비대칭
 
+## 학습 개념
+
+작업 단위별로 필요한 Rust 개념. 단계 순서대로 진행하면 기초 개념에서 lifetime, 클로저 순으로 익히게 됨
+
+### 단계별 개념
+
+- **0단계 (테스트)**
+  - 단위 테스트(`#[cfg(test)] mod tests`)와 통합 테스트(`tests/` 디렉토리)의 차이. 통합 테스트는 crate를 외부 사용자 입장에서 호출함
+- **1단계 (main, gh 헬퍼, 표기 정리)**
+  - `Display`와 `Debug`의 차이, 포맷 지정자 `{}` / `{:?}` / `{:#}`
+  - `std::process::ExitCode`, `main`의 반환 타입을 결정하는 `Termination` trait
+  - `Option`과 `Result` 사이의 변환(`ok_or`, `ok_or_else`, `map_err`), `?` 연산자와 `From` 변환(`#[from]`)
+  - `String`과 `&str`의 관계: 두 타입 사이의 `PartialEq` 구현, deref coercion
+- **2단계 (Paths 주입)**
+  - 구조체 필드를 소유할지(`PathBuf`) 빌릴지(`&Path`) 결정, 함수 인자로 `&Paths` 전달
+- **3단계 (입력 파싱)**
+  - newtype 패턴
+  - `FromStr`과 `TryFrom` trait. clap `value_parser`와 serde `try_from`이 이 trait을 사용함
+  - 생성자가 `Result`를 반환하는 패턴(`fn new(..) -> Result<Self>`)
+- **4단계 (FileDiff 재설계)**
+  - 데이터를 가진 enum, `match`의 exhaustiveness(모든 경우 처리 강제)와 구조 분해
+  - match ergonomics: `match &x`와 `match x`의 차이. 참조로 match하면 바인딩이 참조가 되어 clone이 필요해짐
+  - 컬렉션에서 값을 꺼낼 때의 소유권 이동: `HashMap::remove`, `into_iter()`
+- **5단계 (render 분리)**
+  - `std::io::Write` trait. `Vec<u8>`, `Stdout`, `BufWriter`가 모두 구현함
+  - 인자 위치의 `impl Trait`(정적 디스패치)와 `&mut dyn Write`(동적 디스패치)의 차이
+  - `io::Write`와 `fmt::Write`의 차이: `String`에 `write!`하려면 `fmt::Write`가 필요함
+  - `io::ErrorKind`로 에러 종류 구분(`BrokenPipe`)
+- **6~7단계 (plan / resolve / execute)**
+  - lifetime: `Action<'a>`가 `&'a FileDiff`를 빌리면 `Vec<FileDiff>`가 Action보다 오래 살아야 함
+  - 클로저와 `Fn` / `FnMut` / `FnOnce`의 차이: `choose`가 `GitHubClient`를 캡처하거나 상태를 바꾸면 `FnMut`이 필요함
+  - iterator 어댑터(`filter`, `filter_map`, `partition`)로 Action 목록 생성과 필터링
+- **8단계 (에러)**
+  - `std::error::Error` trait과 `source()`를 통한 원인 체인
+  - thiserror의 `#[source]`, anyhow의 `Context` trait(`with_context`)과 `downcast_ref`
+
+### 함정
+
+- `Action<'a>` 방식에서 diffs를 함수 안에서 만들고 Action만 반환하면 `returns a value referencing data owned by the current function` 에러가 발생함. diffs를 소유하는 호출부가 plan과 execute를 모두 호출하는 구조여야 함
+- `BufWriter`에 쓴 뒤 `flush()`를 빠뜨리면 `Vec<u8>`을 쓰는 테스트에서는 드러나지 않고 실제 stdout에서만 출력 누락이나 에러 은폐가 발생할 수 있음
+
+### 참고 자료
+
+- The Rust Programming Language(공식 책)
+  - 12장 "An I/O Project": `run()`과 lib 분리, stderr 출력을 다루며 1단계, 5단계와 구조가 거의 같음
+  - 6장(enum), 9장(에러), 10장(제네릭, trait, lifetime), 11장(테스트), 13장(클로저, iterator)
+
 ## 테스트 전략
 
 외부 의존이 있어 `assert_cmd` 통합 테스트만으로는 비용이 큼
