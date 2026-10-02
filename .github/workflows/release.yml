@@ -17,7 +17,7 @@ jobs:
         include:
           - target: aarch64-apple-darwin
             os: macos-latest
-            name: clync-darwin-arm64
+            name: clync-aarch64-apple-darwin
 
     steps:
       - uses: actions/checkout@v6
@@ -58,10 +58,8 @@ jobs:
       - name: Prepare release assets
         run: |
           cd release
-          for file in clync-*; do
-            chmod +x "$file"
-            sha256sum "$file" > "$file.sha256"
-          done
+          chmod +x clync-*
+          sha256sum clync-* > SHA256SUMS
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
